@@ -14,12 +14,14 @@ export function generateStaticParams() {
   return locations.map((l) => ({ state: l.stateSlug, city: l.citySlug }));
 }
 
-export function generateMetadata({
-  params,
-}: {
-  params: { state: string; city: string };
-}): Metadata {
-  const location = getLocation(params.state, params.city);
+type LocationPageParams = {
+  state: string;
+  city: string;
+};
+
+export async function generateMetadata({ params }: { params: Promise<LocationPageParams> }): Promise<Metadata> {
+  const { state, city } = await params;
+  const location = getLocation(state, city);
   if (!location) return {};
   return buildMetadata({
     title: `Cleaning Services in ${location.city}, ${location.state}`,
@@ -28,12 +30,9 @@ export function generateMetadata({
   });
 }
 
-export default function LocationPage({
-  params,
-}: {
-  params: { state: string; city: string };
-}) {
-  const location = getLocation(params.state, params.city);
+export default async function LocationPage({ params }: { params: Promise<LocationPageParams> }) {
+  const { state, city } = await params;
+  const location = getLocation(state, city);
   if (!location) notFound();
 
   return (
